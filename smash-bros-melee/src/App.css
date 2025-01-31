@@ -1,0 +1,103 @@
+/* Reset some basic margins & padding */
+body, html, #root {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  font-family: sans-serif;
+  overflow: hidden; /* So the page doesn't scroll if background is large */
+}
+
+.screen-container {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  color: white;
+  text-align: center;
+  overflow: hidden;
+}
+
+/* Background swirl effect */
+.swirl-background {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 200%;
+  height: 200%;
+  background: conic-gradient(
+    from 0deg,
+    #262626 0deg,
+    #2a2a2a 30deg,
+    #0a0a0a 60deg,
+    #1a1a1a 90deg,
+    #2b2b2b 120deg,
+    #303030 150deg,
+    #1a1a1a 180deg,
+    #262626 210deg,
+    #2a2a2a 240deg,
+    #0a0a0a 270deg,
+    #1a1a1a 300deg,
+    #2b2b2b 330deg,
+    #303030 360deg
+  );
+  animation: swirl 15s linear infinite;
+  z-index: 0;
+}
+
+/* Keyframes to rotate the swirl */
+@keyframes swirl {
+  0% {
+    transform: translate(-25%, -25%) rotate(0deg);
+  }
+  100% {
+    transform: translate(-25%, -25%) rotate(360deg);
+  }
+}
+
+/* Foreground container */
+.title-container {
+  position: relative;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 1;
+}
+
+.main-title {
+  font-family: Impact, "Arial Black", sans-serif;
+  font-size: 4rem;
+  line-height: 1em;
+  margin: 0;
+  text-shadow: 0 0 5px rgba(255,255,255,0.7);
+  letter-spacing: 0.1em;
+}
+
+.subtitle {
+  font-family: Impact, "Arial Black", sans-serif;
+  font-size: 2rem;
+  margin: 0.5rem 0 2rem;
+  text-shadow: 0 0 5px rgba(255,255,255,0.7);
+  letter-spacing: 0.1em;
+}
+
+/* 'Press Start' text with a subtle pulsing */
+.press-start {
+  font-size: 1.5rem;
+  font-weight: bold;
+  margin-bottom: 2rem;
+  animation: blink 1.5s infinite;
+}
+
+@keyframes blink {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0;
+  }
+}
+
+/* Copyright text */
+.copyright {
+  font-size: 0.8rem;
+  opacity: 0.8;
+  line-height: 1.2em;
+}
