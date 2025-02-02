@@ -1,14 +1,14 @@
 # ============================================================
 # This script monitors for valorant.exe and automatically
 # sets the display resolution to 1280×882 when it is running.
-# When Valorant is not running, it resets the resolution to
-# the fallback value (default: 1920×1080).
+# When Valorant is not running, it reverts the resolution
+# back to 1920×1080.
 # ============================================================
 
 # ---------------------------
-# Define target and fallback resolutions
+# Define the target and fallback resolutions
 # ---------------------------
-$TargetResolution = [PSCustomObject]@{ Width = 1280; Height = 882 }
+$TargetResolution   = [PSCustomObject]@{ Width = 1280; Height = 882 }
 $FallbackResolution = [PSCustomObject]@{ Width = 1920; Height = 1080 }
 
 # ---------------------------
@@ -63,24 +63,21 @@ public class DisplaySettings {
 # ---------------------------
 function Set-DisplayResolution {
     param (
-        [Parameter(Mandatory=$true)]
+        [Parameter(Mandatory = $true)]
         [int]$Width,
-        [Parameter(Mandatory=$true)]
+        [Parameter(Mandatory = $true)]
         [int]$Height
     )
 
-    # Retrieve the primary screen resolution
-    Add-Type -AssemblyName System.Windows.Forms
-    $currentScreen = [System.Windows.Forms.Screen]::PrimaryScreen.Bounds
-
-    # Create a new DEVMODE structure instance
+    # Create and initialize a new DEVMODE structure instance
     $devMode = New-Object DisplaySettings+DEVMODE
-    $devMode.dmDeviceName = New-Object -TypeName System.String("DISPLAY")
+    # Set a default device name (can be "DISPLAY")
+    $devMode.dmDeviceName = "DISPLAY"
     $devMode.dmSize = [System.Runtime.InteropServices.Marshal]::SizeOf($devMode)
     $devMode.dmFields = [DisplaySettings]::DM_PELSWIDTH -bor [DisplaySettings]::DM_PELSHEIGHT
 
     # Set the desired resolution values
-    $devMode.dmPelsWidth = $Width
+    $devMode.dmPelsWidth  = $Width
     $devMode.dmPelsHeight = $Height
 
     # Attempt to change the display settings
@@ -111,28 +108,29 @@ function Get-CurrentResolution {
 # Main Monitoring Loop
 # ---------------------------
 Write-Output "Starting Valorant resolution monitor..."
+
 while ($true) {
-    # Check if Valorant is running
+    # Check if Valorant is running (the process name might be "valorant" or "valorant.exe")
     $valorantProcess = Get-Process -Name "valorant" -ErrorAction SilentlyContinue
 
-    # Get current screen resolution
+    # Get the current screen resolution
     $currentRes = Get-CurrentResolution
 
     if ($valorantProcess) {
-        # If Valorant is running and the current resolution is not the target, change it.
+        # If Valorant is running and current resolution isn't the target, change it.
         if (($currentRes.Width -ne $TargetResolution.Width) -or ($currentRes.Height -ne $TargetResolution.Height)) {
             Write-Output "Valorant detected. Changing resolution to $($TargetResolution.Width)x$($TargetResolution.Height)..."
             Set-DisplayResolution -Width $TargetResolution.Width -Height $TargetResolution.Height
         }
     }
     else {
-        # If Valorant is not running and the current resolution is not the fallback, revert it.
+        # If Valorant is NOT running and the current resolution isn't the fallback, revert it.
         if (($currentRes.Width -ne $FallbackResolution.Width) -or ($currentRes.Height -ne $FallbackResolution.Height)) {
             Write-Output "Valorant is not running. Reverting resolution to $($FallbackResolution.Width)x$($FallbackResolution.Height)..."
             Set-DisplayResolution -Width $FallbackResolution.Width -Height $FallbackResolution.Height
         }
     }
 
-    # Check every 5 seconds (adjust the sleep time if desired)
+    # Check every 5 seconds (adjust as needed)
     Start-Sleep -Seconds 5
 }
