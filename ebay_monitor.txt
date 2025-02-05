@@ -1,6 +1,9 @@
 // sheets script
-// Configuration variables
-const SEARCH_TERM = "number (n)ine sneakers";  // Replace with your desired search term
+const SEARCH_TERMS = [
+  "number (n)ine sneaker",
+  "undercover scab",
+  "vintage"
+]; // Add your search terms here
 const EMAIL_ADDRESS = "flickowens@icloud.com";  // Replace with your email address
 const CHECK_INTERVAL_MINUTES = 1;  // How often to check for new listings
 
@@ -9,7 +12,44 @@ function onOpen() {
   const ui = SpreadsheetApp.getUi();
   ui.createMenu('eBay Monitor')
     .addItem('Start Monitoring', 'setupTrigger')
+    .addItem('Add Search Term', 'addSearchTerm')
     .addToUi();
+}
+
+// Function to add a new search term via UI
+function addSearchTerm() {
+  const ui = SpreadsheetApp.getUi();
+  const response = ui.prompt(
+    'Add New Search Term',
+    'Please enter a new search term:',
+    ui.ButtonSet.OK_CANCEL
+  );
+
+  if (response.getSelectedButton() == ui.Button.OK) {
+    const sheet = SpreadsheetApp.getActiveSheet();
+    const configSheet = getOrCreateConfigSheet();
+    const lastRow = Math.max(configSheet.getLastRow(), 0);
+    configSheet.getRange(lastRow + 1, 1).setValue(response.getResponseText());
+  }
+}
+
+// Create or get configuration sheet
+function getOrCreateConfigSheet() {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  let configSheet = ss.getSheetByName('Config');
+  
+  if (!configSheet) {
+    configSheet = ss.insertSheet('Config');
+    configSheet.getRange('A1').setValue('Search Terms');
+    configSheet.getRange('A1').setFontWeight('bold');
+    
+    // Add initial search terms
+    SEARCH_TERMS.forEach((term, index) => {
+      configSheet.getRange(index + 2, 1).setValue(term);
+    });
+  }
+  
+  return configSheet;
 }
 
 // Set up time-driven trigger
@@ -31,55 +71,71 @@ function setupTrigger() {
 // Initialize spreadsheet with headers
 function initializeSpreadsheet() {
   const sheet = SpreadsheetApp.getActiveSheet();
-  sheet.getRange('A1:E1').setValues([['Item Title', 'Price', 'URL', 'Listed Date', 'Notification Sent']]);
-  sheet.getRange('A1:E1').setFontWeight('bold');
+  sheet.getRange('A1:F1').setValues([['Search Term', 'Item Title', 'Price', 'URL', 'Listed Date', 'Notification Sent']]);
+  sheet.getRange('A1:F1').setFontWeight('bold');
   sheet.setFrozenRows(1);
+}
+
+// Get active search terms from config sheet
+function getSearchTerms() {
+  const configSheet = getOrCreateConfigSheet();
+  const lastRow = configSheet.getLastRow();
+  if (lastRow <= 1) return SEARCH_TERMS; // Return default terms if config is empty
+  
+  return configSheet.getRange(2, 1, lastRow - 1, 1)
+    .getValues()
+    .flat()
+    .filter(term => term !== ''); // Remove empty entries
 }
 
 // Main function to check for new listings
 function checkNewListings() {
   const sheet = SpreadsheetApp.getActiveSheet();
   const lastRow = Math.max(sheet.getLastRow(), 1);
-  const existingUrls = sheet.getRange(2, 3, lastRow - 1, 1).getValues().flat();
-  
-  // Fetch eBay RSS feed
-  const url = `https://www.ebay.com/sch/i.html?_nkw=${encodeURIComponent(SEARCH_TERM)}&_rss=1`;
-  let xml;
-  try {
-    xml = UrlFetchApp.fetch(url).getContentText();
-  } catch (e) {
-    Logger.log('Error fetching eBay RSS feed: ' + e.toString());
-    return;
-  }
-  
-  // Parse XML
-  const document = XmlService.parse(xml);
-  const root = document.getRootElement();
-  const channel = root.getChild('channel');
-  const items = channel.getChildren('item');
+  const existingUrls = sheet.getRange(2, 4, lastRow - 1, 1).getValues().flat();
+  const searchTerms = getSearchTerms();
   
   let newItems = [];
   
-  // Process each item
-  items.forEach(item => {
-    const title = item.getChild('title').getText();
-    const link = item.getChild('link').getText();
-    const pubDate = new Date(item.getChild('pubDate').getText());
-    const price = extractPrice(title);
-    
-    // Check if this is a new item
-    if (!existingUrls.includes(link)) {
-      newItems.push([title, price, link, pubDate, 'No']);
-      sheet.getRange(lastRow + newItems.length, 1, 1, 5).setValues([[title, price, link, pubDate, 'No']]);
+  // Check each search term
+  for (const searchTerm of searchTerms) {
+    // Fetch eBay RSS feed
+    const url = `https://www.ebay.com/sch/i.html?_nkw=${encodeURIComponent(searchTerm)}&_rss=1`;
+    let xml;
+    try {
+      xml = UrlFetchApp.fetch(url).getContentText();
+    } catch (e) {
+      Logger.log(`Error fetching eBay RSS feed for "${searchTerm}": ${e.toString()}`);
+      continue;
     }
-  });
+    
+    // Parse XML
+    const document = XmlService.parse(xml);
+    const root = document.getRootElement();
+    const channel = root.getChild('channel');
+    const items = channel.getChildren('item');
+    
+    // Process each item
+    items.forEach(item => {
+      const title = item.getChild('title').getText();
+      const link = item.getChild('link').getText();
+      const pubDate = new Date(item.getChild('pubDate').getText());
+      const price = extractPrice(title);
+      
+      // Check if this is a new item
+      if (!existingUrls.includes(link)) {
+        newItems.push([searchTerm, title, price, link, pubDate, 'No']);
+        sheet.getRange(lastRow + newItems.length, 1, 1, 6).setValues([[searchTerm, title, price, link, pubDate, 'No']]);
+      }
+    });
+  }
   
   // Send email notification if new items were found
   if (newItems.length > 0) {
     sendNotificationEmail(newItems);
     // Mark notifications as sent
     newItems.forEach((_, index) => {
-      sheet.getRange(lastRow + index + 1, 5).setValue('Yes');
+      sheet.getRange(lastRow + index + 1, 6).setValue('Yes');
     });
   }
 }
@@ -92,12 +148,28 @@ function extractPrice(title) {
 
 // Send email notification
 function sendNotificationEmail(newItems) {
-  const subject = `New eBay Items Found for: ${SEARCH_TERM}`;
+  const subject = `New eBay Items Found`;
   
-  let body = `Found ${newItems.length} new item(s) matching your search term "${SEARCH_TERM}":\n\n`;
+  let body = `Found ${newItems.length} new item(s) matching your search terms:\n\n`;
+  
+  // Group items by search term
+  const itemsByTerm = {};
   newItems.forEach(item => {
-    body += `${item[0]}\nPrice: ${item[1]}\nURL: ${item[2]}\nListed: ${item[3]}\n\n`;
+    if (!itemsByTerm[item[0]]) {
+      itemsByTerm[item[0]] = [];
+    }
+    itemsByTerm[item[0]].push(item);
   });
+  
+  // Build email body organized by search term
+  for (const [searchTerm, items] of Object.entries(itemsByTerm)) {
+    body += `\nSearch Term: "${searchTerm}"\n`;
+    body += `${items.length} new item(s) found:\n`;
+    items.forEach(item => {
+      body += `\n${item[1]}\nPrice: ${item[2]}\nURL: ${item[3]}\nListed: ${item[4]}\n`;
+    });
+    body += '\n---\n';
+  }
   
   MailApp.sendEmail(EMAIL_ADDRESS, subject, body);
 }
