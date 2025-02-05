@@ -1,0 +1,103 @@
+// sheets script
+// Configuration variables
+const SEARCH_TERM = "your search term here";  // Replace with your desired search term
+const EMAIL_ADDRESS = "your.email@example.com";  // Replace with your email address
+const CHECK_INTERVAL_MINUTES = 30;  // How often to check for new listings
+
+// Create menu item to set up the trigger
+function onOpen() {
+  const ui = SpreadsheetApp.getUi();
+  ui.createMenu('eBay Monitor')
+    .addItem('Start Monitoring', 'setupTrigger')
+    .addToUi();
+}
+
+// Set up time-driven trigger
+function setupTrigger() {
+  // Delete existing triggers
+  const triggers = ScriptApp.getProjectTriggers();
+  triggers.forEach(trigger => ScriptApp.deleteTrigger(trigger));
+  
+  // Create new trigger
+  ScriptApp.newTrigger('checkNewListings')
+    .timeBased()
+    .everyMinutes(CHECK_INTERVAL_MINUTES)
+    .create();
+  
+  // Initialize the spreadsheet if it's not already set up
+  initializeSpreadsheet();
+}
+
+// Initialize spreadsheet with headers
+function initializeSpreadsheet() {
+  const sheet = SpreadsheetApp.getActiveSheet();
+  sheet.getRange('A1:E1').setValues([['Item Title', 'Price', 'URL', 'Listed Date', 'Notification Sent']]);
+  sheet.getRange('A1:E1').setFontWeight('bold');
+  sheet.setFrozenRows(1);
+}
+
+// Main function to check for new listings
+function checkNewListings() {
+  const sheet = SpreadsheetApp.getActiveSheet();
+  const lastRow = Math.max(sheet.getLastRow(), 1);
+  const existingUrls = sheet.getRange(2, 3, lastRow - 1, 1).getValues().flat();
+  
+  // Fetch eBay RSS feed
+  const url = `https://www.ebay.com/sch/i.html?_nkw=${encodeURIComponent(SEARCH_TERM)}&_rss=1`;
+  let xml;
+  try {
+    xml = UrlFetchApp.fetch(url).getContentText();
+  } catch (e) {
+    Logger.log('Error fetching eBay RSS feed: ' + e.toString());
+    return;
+  }
+  
+  // Parse XML
+  const document = XmlService.parse(xml);
+  const root = document.getRootElement();
+  const channel = root.getChild('channel');
+  const items = channel.getChildren('item');
+  
+  let newItems = [];
+  
+  // Process each item
+  items.forEach(item => {
+    const title = item.getChild('title').getText();
+    const link = item.getChild('link').getText();
+    const pubDate = new Date(item.getChild('pubDate').getText());
+    const price = extractPrice(title);
+    
+    // Check if this is a new item
+    if (!existingUrls.includes(link)) {
+      newItems.push([title, price, link, pubDate, 'No']);
+      sheet.getRange(lastRow + newItems.length, 1, 1, 5).setValues([[title, price, link, pubDate, 'No']]);
+    }
+  });
+  
+  // Send email notification if new items were found
+  if (newItems.length > 0) {
+    sendNotificationEmail(newItems);
+    // Mark notifications as sent
+    newItems.forEach((_, index) => {
+      sheet.getRange(lastRow + index + 1, 5).setValue('Yes');
+    });
+  }
+}
+
+// Helper function to extract price from title
+function extractPrice(title) {
+  const priceMatch = title.match(/\$\d+(\.\d{2})?/);
+  return priceMatch ? priceMatch[0] : 'N/A';
+}
+
+// Send email notification
+function sendNotificationEmail(newItems) {
+  const subject = `New eBay Items Found for: ${SEARCH_TERM}`;
+  
+  let body = `Found ${newItems.length} new item(s) matching your search term "${SEARCH_TERM}":\n\n`;
+  newItems.forEach(item => {
+    body += `${item[0]}\nPrice: ${item[1]}\nURL: ${item[2]}\nListed: ${item[3]}\n\n`;
+  });
+  
+  MailApp.sendEmail(EMAIL_ADDRESS, subject, body);
+}
