@@ -1,8 +1,8 @@
 // sheets script
 // Configuration variables
-const SEARCH_TERM = "your search term here";  // Replace with your desired search term
-const EMAIL_ADDRESS = "your.email@example.com";  // Replace with your email address
-const CHECK_INTERVAL_MINUTES = 30;  // How often to check for new listings
+const SEARCH_TERM = "number (n)ine sneakers";  // Replace with your desired search term
+const EMAIL_ADDRESS = "flickowens@icloud.com";  // Replace with your email address
+const CHECK_INTERVAL_MINUTES = 1;  // How often to check for new listings
 
 // Create menu item to set up the trigger
 function onOpen() {
