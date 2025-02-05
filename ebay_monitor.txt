@@ -1,4 +1,5 @@
-// sheets script
+// Sheets script
+// Configuration variables
 const SEARCH_TERMS = [
   "number (n)ine sneaker",
   "undercover scab",
@@ -26,10 +27,11 @@ function addSearchTerm() {
   );
 
   if (response.getSelectedButton() == ui.Button.OK) {
-    const sheet = SpreadsheetApp.getActiveSheet();
-    const configSheet = getOrCreateConfigSheet();
-    const lastRow = Math.max(configSheet.getLastRow(), 0);
-    configSheet.getRange(lastRow + 1, 1).setValue(response.getResponseText());
+    const term = response.getResponseText().trim();
+    if (term) {
+      const configSheet = getOrCreateConfigSheet();
+      configSheet.appendRow([term]);
+    }
   }
 }
 
@@ -40,13 +42,8 @@ function getOrCreateConfigSheet() {
   
   if (!configSheet) {
     configSheet = ss.insertSheet('Config');
-    configSheet.getRange('A1').setValue('Search Terms');
-    configSheet.getRange('A1').setFontWeight('bold');
-    
-    // Add initial search terms
-    SEARCH_TERMS.forEach((term, index) => {
-      configSheet.getRange(index + 2, 1).setValue(term);
-    });
+    configSheet.appendRow(['Search Terms']);
+    SEARCH_TERMS.forEach(term => configSheet.appendRow([term]));
   }
   
   return configSheet;
@@ -54,17 +51,14 @@ function getOrCreateConfigSheet() {
 
 // Set up time-driven trigger
 function setupTrigger() {
-  // Delete existing triggers
   const triggers = ScriptApp.getProjectTriggers();
   triggers.forEach(trigger => ScriptApp.deleteTrigger(trigger));
   
-  // Create new trigger
   ScriptApp.newTrigger('checkNewListings')
     .timeBased()
     .everyMinutes(CHECK_INTERVAL_MINUTES)
     .create();
   
-  // Initialize the spreadsheet if it's not already set up
   initializeSpreadsheet();
 }
 
@@ -79,63 +73,49 @@ function initializeSpreadsheet() {
 // Get active search terms from config sheet
 function getSearchTerms() {
   const configSheet = getOrCreateConfigSheet();
-  const lastRow = configSheet.getLastRow();
-  if (lastRow <= 1) return SEARCH_TERMS; // Return default terms if config is empty
-  
-  return configSheet.getRange(2, 1, lastRow - 1, 1)
-    .getValues()
-    .flat()
-    .filter(term => term !== ''); // Remove empty entries
+  const terms = configSheet.getRange(2, 1, configSheet.getLastRow() - 1, 1).getValues();
+  return terms.flat().filter(term => term); // Remove empty entries
 }
 
 // Main function to check for new listings
 function checkNewListings() {
   const sheet = SpreadsheetApp.getActiveSheet();
-  const lastRow = Math.max(sheet.getLastRow(), 1);
-  const existingUrls = sheet.getRange(2, 4, lastRow - 1, 1).getValues().flat();
+  const existingUrls = sheet.getRange(2, 4, sheet.getLastRow() - 1, 1).getValues().flat();
   const searchTerms = getSearchTerms();
   
   let newItems = [];
   
-  // Check each search term
-  for (const searchTerm of searchTerms) {
-    // Fetch eBay RSS feed
+  searchTerms.forEach(searchTerm => {
     const url = `https://www.ebay.com/sch/i.html?_nkw=${encodeURIComponent(searchTerm)}&_rss=1`;
     let xml;
+    
     try {
       xml = UrlFetchApp.fetch(url).getContentText();
     } catch (e) {
-      Logger.log(`Error fetching eBay RSS feed for "${searchTerm}": ${e.toString()}`);
-      continue;
+      Logger.log(`Error fetching eBay RSS feed for "${searchTerm}": ${e}`);
+      return;
     }
     
-    // Parse XML
     const document = XmlService.parse(xml);
-    const root = document.getRootElement();
-    const channel = root.getChild('channel');
-    const items = channel.getChildren('item');
+    const items = document.getRootElement().getChild('channel').getChildren('item');
     
-    // Process each item
     items.forEach(item => {
       const title = item.getChild('title').getText();
       const link = item.getChild('link').getText();
       const pubDate = new Date(item.getChild('pubDate').getText());
       const price = extractPrice(title);
       
-      // Check if this is a new item
       if (!existingUrls.includes(link)) {
         newItems.push([searchTerm, title, price, link, pubDate, 'No']);
-        sheet.getRange(lastRow + newItems.length, 1, 1, 6).setValues([[searchTerm, title, price, link, pubDate, 'No']]);
+        sheet.appendRow([searchTerm, title, price, link, pubDate, 'No']);
       }
     });
-  }
+  });
   
-  // Send email notification if new items were found
   if (newItems.length > 0) {
     sendNotificationEmail(newItems);
-    // Mark notifications as sent
     newItems.forEach((_, index) => {
-      sheet.getRange(lastRow + index + 1, 6).setValue('Yes');
+      sheet.getRange(sheet.getLastRow() - newItems.length + index + 1, 6).setValue('Yes');
     });
   }
 }
@@ -149,10 +129,8 @@ function extractPrice(title) {
 // Send email notification
 function sendNotificationEmail(newItems) {
   const subject = `New eBay Items Found`;
-  
   let body = `Found ${newItems.length} new item(s) matching your search terms:\n\n`;
   
-  // Group items by search term
   const itemsByTerm = {};
   newItems.forEach(item => {
     if (!itemsByTerm[item[0]]) {
@@ -161,10 +139,8 @@ function sendNotificationEmail(newItems) {
     itemsByTerm[item[0]].push(item);
   });
   
-  // Build email body organized by search term
   for (const [searchTerm, items] of Object.entries(itemsByTerm)) {
-    body += `\nSearch Term: "${searchTerm}"\n`;
-    body += `${items.length} new item(s) found:\n`;
+    body += `\nSearch Term: "${searchTerm}"\n${items.length} new item(s) found:\n`;
     items.forEach(item => {
       body += `\n${item[1]}\nPrice: ${item[2]}\nURL: ${item[3]}\nListed: ${item[4]}\n`;
     });
