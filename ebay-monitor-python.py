@@ -18,8 +18,9 @@ class EbayMonitor:
         # Email settings - replace with your email provider's SMTP settings
         self.smtp_server = "smtp.gmail.com"
         self.smtp_port = 587
-        self.smtp_username = "your.email@gmail.com"  # Replace with your email
+        self.smtp_username = "lucpeloquin77@gmail.com"  # Sender email
         self.smtp_password = "your-app-password"     # Replace with your app password
+        self.recipient_email = "flickowens@icloud.com"  # Recipient email
         
     def load_seen_items(self) -> Dict:
         """Load previously seen items from JSON file"""
