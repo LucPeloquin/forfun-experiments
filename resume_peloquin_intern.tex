@@ -1,0 +1,246 @@
+%-------------------------
+% Resume in Latex
+% Author : Jake Gutierrez
+% Based off of: https://github.com/sb2nov/resume
+% License : MIT
+%------------------------
+
+\documentclass[letterpaper,11pt]{article}
+
+\usepackage{latexsym}
+\usepackage[empty]{fullpage}
+\usepackage{titlesec}
+\usepackage{marvosym}
+\usepackage[usenames,dvipsnames]{color}
+\usepackage{verbatim}
+\usepackage{enumitem}
+\usepackage[hidelinks]{hyperref}
+\usepackage{fancyhdr}
+\usepackage[english]{babel}
+\usepackage{tabularx}
+\input{glyphtounicode}
+
+\hypersetup{
+    colorlinks=true,
+    linkcolor=black,
+    filecolor=black,      
+    urlcolor=black,
+    pdftitle={Your Resume},
+    pdfpagemode=FullScreen,
+}
+
+%----------FONT OPTIONS----------
+% sans-serif
+% \usepackage[sfdefault]{FiraSans}
+% \usepackage[sfdefault]{roboto}
+% \usepackage[sfdefault]{noto-sans}
+% \usepackage[default]{sourcesanspro}
+
+% serif
+% \usepackage{CormorantGaramond}
+% \usepackage{charter}
+
+
+\pagestyle{fancy}
+\fancyhf{} % clear all header and footer fields
+\fancyfoot{}
+\renewcommand{\headrulewidth}{0pt}
+\renewcommand{\footrulewidth}{0pt}
+
+% Adjust margins
+\addtolength{\oddsidemargin}{-0.5in}
+\addtolength{\evensidemargin}{-0.5in}
+\addtolength{\textwidth}{1in}
+\addtolength{\topmargin}{-.5in}
+\addtolength{\textheight}{1.0in}
+
+\urlstyle{same}
+
+\raggedbottom
+\raggedright
+\setlength{\tabcolsep}{0in}
+
+% Sections formatting
+\titleformat{\section}{
+  \vspace{-4pt}\scshape\raggedright\large
+}{}{0em}{}[\color{black}\titlerule \vspace{-5pt}]
+
+% Ensure that generate pdf is machine readable/ATS parsable
+\pdfgentounicode=1
+
+%-------------------------
+% Custom commands
+\newcommand{\resumeItem}[1]{
+  \item\small{
+    {#1 \vspace{-2pt}}
+  }
+}
+
+\newcommand{\resumeSubheading}[4]{
+  \vspace{-2pt}\item
+    \begin{tabular*}{0.97\textwidth}[t]{l@{\extracolsep{\fill}}r}
+      \textbf{#1} & #2 \\
+      \textit{\small#3} & \textit{\small #4} \\
+    \end{tabular*}\vspace{-7pt}
+}
+
+\newcommand{\resumeSubSubheading}[2]{
+    \item
+    \begin{tabular*}{0.97\textwidth}{l@{\extracolsep{\fill}}r}
+      \textit{\small#1} & \textit{\small #2} \\
+    \end{tabular*}\vspace{-7pt}
+}
+
+\newcommand{\resumeProjectHeading}[2]{
+  \item
+  \begin{tabular*}{0.97\textwidth}{l@{\extracolsep{\fill}}r}
+    \textbf{#1} & #2 \\
+  \end{tabular*}\vspace{-7pt}
+}
+
+\newcommand{\resumeSubItem}[1]{\resumeItem{#1}\vspace{-4pt}}
+
+\renewcommand\labelitemii{$\vcenter{\hbox{\tiny$\bullet$}}$}
+
+\newcommand{\resumeSubHeadingListStart}{\begin{itemize}[leftmargin=0.15in, label={}]}
+\newcommand{\resumeSubHeadingListEnd}{\end{itemize}}
+\newcommand{\resumeItemListStart}{\begin{itemize}}
+\newcommand{\resumeItemListEnd}{\end{itemize}\vspace{-5pt}}
+
+%-------------------------------------------
+%%%%%%  RESUME STARTS HERE  %%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+\begin{document}
+
+%----------HEADING----------
+% \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+%   \textbf{\href{http://sourabhbajaj.com/}{\Large Sourabh Bajaj}} & Email : \href{mailto:sourabh@sourabhbajaj.com}{sourabh@sourabhbajaj.com}\\
+%   \href{http://sourabhbajaj.com/}{http://www.sourabhbajaj.com} & Mobile : +1-123-456-7890 \\
+% \end{tabular*}
+
+\begin{center}
+    \textbf{\Huge \scshape Jean-Luc Peloquin} \\ \vspace{1pt}
+    \small (702) 283-4014 $|$ \href{mailto:lucpeloquin77@gmail.com}{lucpeloquin77@gmail.com} $|$ 
+    \href{https://www.linkedin.com/in/jean-luc-peloquin/}{LinkedIn} $|$
+    \href{https://peloquin.dev/}{peloquin.dev}
+\end{center}
+
+
+%-----------EDUCATION-----------
+\section{Education}
+  \resumeSubHeadingListStart
+    \resumeSubheading
+      {University of Nevada, Las Vegas}{Las Vegas, NV}
+      {Bachelor of Science in Computer Science — 3.5 GPA}{Aug. 2020 -- May 2024}
+      \resumeItemListStart
+        \resumeItem{\textbf{Honors:} Provost's Scholarship (2020-2024), Ralph Dippner Scholarship (2023), Gilman and Bartlett Scholarship (2022), Howard R. Hughes College of Engineering Scholarship (2021), Dean's List (2020-2021, 2023-2024)}
+      \resumeItemListEnd
+      \resumeSubheading
+      {University of Nevada, Las Vegas}{Las Vegas, NV}
+      {Master of Science in Data Analytics}{Aug. 2025 -- May 2027}
+  \resumeSubHeadingListEnd
+  
+%-----------CERTIFICATIONS-----------
+\section{Certifications}
+  \resumeSubHeadingListStart
+    \resumeSubheading
+      {Data Analytics Advanced Professional Certificate}{March 2025}
+      {Google}{}
+      \resumeItemListStart
+        \resumeItem{Demonstrated hands-on experience with data cleaning, data visualization, and communicating data analytics}
+        \resumeItem{Confidence in transforming complex data into actionable and clear insights using Excel, SQL, R, and Python}
+        \resumeItem{Practical use of transforming data into interactive dashboards using Tableau and other data visualization tools}
+        \resumeItem{Studied advanced statistical methods such as regression analysis and machine learning pipelines}
+      \resumeItemListEnd
+  \resumeSubHeadingListEnd
+  
+%-----------EXPERIENCE-----------
+\section{Experience}
+  \resumeSubHeadingListStart
+
+    \resumeSubheading
+      {Specialist}{July 2024 -- Present}
+      {Apple}{Las Vegas, NV}
+      \resumeItemListStart
+        \resumeItem{Conducted advanced technical support for hardware and software issues across the Apple ecosystem}
+        \resumeItem{Communicated within a large team to maximize efficiency and ensure a smooth customer experience}
+        \resumeItem{Finished Top 3 in revenue for Q4 2024, lead Product Zone in sales for all Specialists}
+        \resumeItem{Configured device management of operating systems for internal and demo purposes aligned with IS\&T standards}
+      \resumeItemListEnd
+      
+% -----------Multiple Positions Heading-----------
+%    \resumeSubSubheading
+%     {Software Engineer I}{Oct 2014 - Sep 2016}
+%     \resumeItemListStart
+%        \resumeItem{Apache Beam}
+%          {Apache Beam is a unified model for defining both batch and streaming data-parallel processing pipelines}
+%     \resumeItemListEnd
+%    \resumeSubHeadingListEnd
+%-------------------------------------------
+
+  \resumeSubHeadingListEnd
+
+
+%-----------PROJECTS-----------
+\section{Projects}
+  \resumeSubHeadingListStart
+    \resumeProjectHeading
+      {\href{https://github.com/LucPeloquin/Automatic-Enhancement-of-Fashion-Imagery}{\underline{Automatic Enhancement of Fashion Imagery}}}{Python {\small\textit{(OpenCV, NumPy, Pandas)}}}
+      \resumeItemListStart
+        \resumeItem{Developed an advanced method to automatically upscale, sharpen, and recognize figures in fashion images}
+        \resumeItem{Implemented a multi-stage pipeline to determine optimal processing parameters based on lighting conditions, contrast levels, noise presence, and detail complexity, ensuring tailored enhancements for high-variance images}
+      \resumeItemListEnd
+    
+    \resumeProjectHeading
+      {\href{https://peloquin.dev/documents/amt.pdf}{\underline{Automatic Music Transposition}}}{Python {\small\textit{(TensorFlow, NumPy, Librosa)}}, C++ {\small\textit{(JUCE)}}, MusicXML}
+      \resumeItemListStart
+        \resumeItem{Collaborated with a team to engineer a specialized application that leverages transformer-based machine learning models and advanced waveform analysis for automatic music transcription from audio files}
+        \resumeItem{Implemented the MT3 framework (TensorFlow) and ScoreTransformer to transcribe user-selected audio files into MusicXML format with the option to export as MIDI, utilizing the JUCE framework for UI and file handling}
+      \resumeItemListEnd
+    
+    \resumeProjectHeading
+      {\href{https://github.com/LucPeloquin/VCT-Scoreboard-Matrix}{\underline{VCT Scoreboard Matrix}}}{Python {\small\textit{(OpenCV, EasyOCR, Google Vision API, Pandas)}}}
+      \resumeItemListStart
+        \resumeItem{Developed an automated OCR-based video processing tool using OpenCV and EasyOCR/Google Vision API to extract, filter, and dynamically identify key information from an active UI}
+        \resumeItem{Applied advanced post-processing techniques, including text line sorting and background recognition, to enhance information extraction, leveraging expertise in computer vision, text recognition, and data manipulation}
+      \resumeItemListEnd
+          
+    \resumeProjectHeading
+      {\href{https://github.com/LucPeloquin/automoni}{\underline{Automoni - Automated System Monitoring}}}{Go, Python {\small\textit{(Selenium, ntfy API)}}}
+      \resumeItemListStart
+        \resumeItem{Engineered a specialized tool that monitors second-hand marketplace listings using sophisticated web scraping techniques that avoid anti-bot measures, tracking new product listings and price changes in real-time}
+        \resumeItem{Deployed in Replit (cloud) and implemented ntfy for push notification delivery to iOS devices, providing user with automated instant alerts when items matching user-defined criteria appear on the marketplace}
+      \resumeItemListEnd
+
+  \resumeSubHeadingListEnd
+
+
+
+%
+% %-----------PROGRAMMING SKILLS-----------
+% \section{Technical Skills}
+%  \begin{itemize}[leftmargin=0.15in, label={}]
+%     \small{\item{
+%      \textbf{Languages}{: Java, Python, C/C++, SQL (Postgres), JavaScript, HTML/CSS, R} \\
+%      \textbf{Frameworks}{: React, Node.js, Flask, JUnit, WordPress, Material-UI, FastAPI} \\
+%      \textbf{Developer Tools}{: Git, Docker, TravisCI, Google Cloud Platform, VS Code, Visual Studio, PyCharm, IntelliJ, Eclipse} \\
+%      \textbf{Libraries}{: pandas, NumPy, Matplotlib}
+%     }}
+%  \end{itemize}
+
+
+%-----------PROGRAMMING SKILLS-----------
+\section{Technical Skills}
+ \begin{itemize}[leftmargin=0.15in, label={}]
+    \small{\item{
+     \textbf{Languages}{: Python, C++, C\#, Java, SQL, Go, R, HTML, CSS, JavaScript, TypeScript} \\
+     \textbf{Libraries \& Frameworks}{: Pandas, Matplotlib, Selenium, PyTorch, TensorFlow, scikit-learn, React, Node.js} \\
+     \textbf{Cloud \& DevOps}{: AWS, Google Cloud, Docker, Kubernetes, Git, GitHub} \\
+     \textbf{Data \& Analytics}{: Jupyter Notebooks, Tableau, Power BI, BigQuery} \\
+     \textbf{Developer Tools}{: VS Code, Cursor, Visual Studio, PyCharm, Jira}
+    }}
+ \end{itemize}
+ 
+%-------------------------------------------
+\end{document}
